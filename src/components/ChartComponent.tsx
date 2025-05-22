@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import 'chartjs-adapter-moment';
+import { motion } from 'framer-motion';
 import { useSensorData } from '../context/SensorDataContext';
 
 interface ChartComponentProps {
@@ -13,7 +14,6 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
   const chartInstance = useRef<Chart | null>(null);
   const { historicalData } = useSensorData();
   
-  // Convert timeRange to milliseconds
   const getTimeRangeInMs = (): number => {
     switch (timeRange) {
       case '1m': return 60 * 1000;
@@ -27,20 +27,17 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
 
   useEffect(() => {
     if (chartRef.current) {
-      // Filter data based on time range
       const timeRangeMs = getTimeRangeInMs();
       const currentTime = new Date().getTime();
       const filteredData = historicalData.filter(data => 
         (currentTime - data.timestamp.getTime()) <= timeRangeMs
       );
 
-      // Destroy previous chart if it exists
       if (chartInstance.current) {
         chartInstance.current.destroy();
         chartInstance.current = null;
       }
 
-      // Format data based on chart type
       let datasets = [];
       
       if (type === 'heartRate' || type === 'combined') {
@@ -50,8 +47,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
             x: data.timestamp,
             y: data.heartRate
           })),
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderColor: 'rgb(239, 68, 68)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
           fill: true,
           tension: 0.4,
           yAxisID: 'y'
@@ -73,7 +70,6 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
         });
       }
 
-      // Configure chart scales
       const scales: any = {
         x: {
           type: 'time',
@@ -84,12 +80,15 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
               hour: 'HH:mm'
             }
           },
-          title: {
-            display: true,
-            text: 'Time'
-          },
           grid: {
-            display: false
+            display: true,
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            font: {
+              family: "'Inter var', sans-serif",
+              size: 11
+            }
           }
         },
         y: {
@@ -98,17 +97,27 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
           position: 'left',
           title: {
             display: true,
-            text: type === 'temperature' ? 'Temperature (°C)' : 'Heart Rate (BPM)'
+            text: type === 'temperature' ? 'Temperature (°C)' : 'Heart Rate (BPM)',
+            font: {
+              family: "'Inter var', sans-serif",
+              size: 12,
+              weight: '500'
+            }
           },
           suggestedMin: type === 'temperature' ? 15 : 40,
           suggestedMax: type === 'temperature' ? 40 : 120,
           grid: {
-            color: 'rgba(200, 200, 200, 0.15)'
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            font: {
+              family: "'Inter var', sans-serif",
+              size: 11
+            }
           }
         }
       };
 
-      // Add second y-axis for combined chart
       if (type === 'combined') {
         scales.y1 = {
           type: 'linear',
@@ -116,24 +125,32 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
           position: 'right',
           title: {
             display: true,
-            text: 'Temperature (°C)'
+            text: 'Temperature (°C)',
+            font: {
+              family: "'Inter var', sans-serif",
+              size: 12,
+              weight: '500'
+            }
           },
           suggestedMin: 15,
           suggestedMax: 40,
           grid: {
             drawOnChartArea: false
+          },
+          ticks: {
+            font: {
+              family: "'Inter var', sans-serif",
+              size: 11
+            }
           }
         };
       }
 
-      // Create new chart
       const ctx = chartRef.current.getContext('2d');
       if (ctx) {
         chartInstance.current = new Chart(ctx, {
           type: 'line',
-          data: {
-            datasets
-          },
+          data: { datasets },
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -144,29 +161,42 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
             plugins: {
               tooltip: {
                 enabled: true,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                titleColor: '#1e293b',
-                bodyColor: '#334155',
-                borderColor: '#e2e8f0',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#1f2937',
+                bodyColor: '#4b5563',
+                borderColor: '#e5e7eb',
                 borderWidth: 1,
                 padding: 12,
                 boxPadding: 6,
                 usePointStyle: true,
+                titleFont: {
+                  family: "'Inter var', sans-serif",
+                  size: 12,
+                  weight: '600'
+                },
+                bodyFont: {
+                  family: "'Inter var', sans-serif",
+                  size: 12
+                },
                 callbacks: {
                   label: function(context) {
                     const label = context.dataset.label || '';
-                    const value = context.parsed.y.toFixed(context.dataset.label?.includes('Temperature') ? 1 : 0);
+                    const value = context.parsed.y.toFixed(
+                      context.dataset.label?.includes('Temperature') ? 1 : 0
+                    );
                     return `${label}: ${value}`;
                   }
                 }
               },
               legend: {
                 position: 'top',
+                align: 'end',
                 labels: {
                   usePointStyle: true,
                   boxWidth: 6,
                   padding: 20,
                   font: {
+                    family: "'Inter var', sans-serif",
                     size: 12
                   }
                 }
@@ -175,8 +205,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
             scales,
             animations: {
               y: {
-                easing: 'easeOutQuad',
-                duration: 500
+                easing: 'easeOutQuart',
+                duration: 750
               }
             }
           }
@@ -193,16 +223,14 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ type, timeRange }) => {
   }, [historicalData, type, timeRange]);
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md h-full">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">
-        {type === 'heartRate' && 'Heart Rate Monitor'}
-        {type === 'temperature' && 'Temperature Monitor'}
-        {type === 'combined' && 'Health Metrics Dashboard'}
-      </h3>
-      <div className="h-[300px] md:h-[400px]">
-        <canvas ref={chartRef}></canvas>
-      </div>
-    </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="h-full w-full"
+    >
+      <canvas ref={chartRef}></canvas>
+    </motion.div>
   );
 };
 
