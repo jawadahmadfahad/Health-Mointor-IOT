@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Heart, BarChart2, Settings, Activity, User, Menu, X } from 'lucide-react';
 import { useSensorData } from '../context/SensorDataContext';
 import StatusIndicator from './StatusIndicator';
+import { motion } from 'framer-motion';
 
 const Layout = () => {
   const location = useLocation();
@@ -14,121 +15,143 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-900 to-blue-800 text-white sticky top-0 z-50 shadow-lg">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              <Heart className="h-5 w-5 text-blue-100 animate-pulse" />
-            </div>
-            <div className="font-semibold text-xl tracking-tight">HealthTrack Pro</div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className={`flex items-center space-x-1 transition-colors hover:text-blue-200 ${isActive('/') ? 'text-blue-200' : 'text-white'}`}>
-              <Activity className="h-4 w-4" />
-              <span>Dashboard</span>
+      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Heart className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                HealthTrack Pro
+              </span>
             </Link>
-            <Link to="/analytics" className={`flex items-center space-x-1 transition-colors hover:text-blue-200 ${isActive('/analytics') ? 'text-blue-200' : 'text-white'}`}>
-              <BarChart2 className="h-4 w-4" />
-              <span>Analytics</span>
-            </Link>
-            <Link to="/arduino-setup" className={`flex items-center space-x-1 transition-colors hover:text-blue-200 ${isActive('/arduino-setup') ? 'text-blue-200' : 'text-white'}`}>
-              <Settings className="h-4 w-4" />
-              <span>Arduino Setup</span>
-            </Link>
-            <Link to="/profile" className={`flex items-center space-x-1 transition-colors hover:text-blue-200 ${isActive('/profile') ? 'text-blue-200' : 'text-white'}`}>
-              <User className="h-4 w-4" />
-              <span>Profile</span>
-            </Link>
-          </nav>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white focus:outline-none"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              {[
+                { path: '/', icon: Activity, label: 'Dashboard' },
+                { path: '/analytics', icon: BarChart2, label: 'Analytics' },
+                { path: '/arduino-setup', icon: Settings, label: 'Setup' },
+                { path: '/profile', icon: User, label: 'Profile' }
+              ].map(({ path, icon: Icon, label }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isActive(path)
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="font-medium">{label}</span>
+                </Link>
+              ))}
+            </nav>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden bg-blue-900/95 backdrop-blur-sm">
-            <div className="container mx-auto px-4 py-3 flex flex-col space-y-3">
-              <Link 
-                to="/" 
-                className={`flex items-center space-x-2 p-2 rounded-md ${isActive('/') ? 'bg-blue-800 text-white' : 'text-blue-100'}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Activity className="h-5 w-5" />
-                <span>Dashboard</span>
-              </Link>
-              <Link 
-                to="/analytics" 
-                className={`flex items-center space-x-2 p-2 rounded-md ${isActive('/analytics') ? 'bg-blue-800 text-white' : 'text-blue-100'}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <BarChart2 className="h-5 w-5" />
-                <span>Analytics</span>
-              </Link>
-              <Link 
-                to="/arduino-setup" 
-                className={`flex items-center space-x-2 p-2 rounded-md ${isActive('/arduino-setup') ? 'bg-blue-800 text-white' : 'text-blue-100'}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Settings className="h-5 w-5" />
-                <span>Arduino Setup</span>
-              </Link>
-              <Link 
-                to="/profile" 
-                className={`flex items-center space-x-2 p-2 rounded-md ${isActive('/profile') ? 'bg-blue-800 text-white' : 'text-blue-100'}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span>Profile</span>
-              </Link>
-            </div>
-          </nav>
-        )}
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6 text-gray-600" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600" />
+              )}
+            </button>
+          </div>
 
-        {/* Status Bar */}
-        {currentData && (
-          <div className="bg-gradient-to-r from-blue-800 to-blue-700 text-white border-t border-blue-700">
-            <div className="container mx-auto px-4 py-2 flex justify-between items-center text-sm">
+          {/* Status Bar */}
+          {currentData && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 flex items-center justify-between text-sm"
+            >
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <Heart className="h-4 w-4 text-red-400" />
-                  <span>{currentData.heartRate} BPM</span>
+                  <div className="p-2 rounded-lg bg-red-50">
+                    <Heart className="h-4 w-4 text-red-500" />
+                  </div>
+                  <span className="font-medium text-gray-700">{currentData.heartRate} BPM</span>
                   <StatusIndicator status={currentData.status.heartRate} />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-yellow-400">◦</span>
-                  <span>{currentData.temperature}°C</span>
+                  <div className="p-2 rounded-lg bg-yellow-50">
+                    <span className="text-yellow-500">◦</span>
+                  </div>
+                  <span className="font-medium text-gray-700">{currentData.temperature}°C</span>
                   <StatusIndicator status={currentData.status.temperature} />
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'}`}></span>
-                <span className="text-blue-100">{isConnected ? 'Connected' : 'Simulated Data'}</span>
+                <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                <span className="text-gray-600">{isConnected ? 'Connected' : 'Simulated Data'}</span>
               </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <motion.nav
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden bg-white border-t border-gray-100"
+          >
+            <div className="container mx-auto px-4 py-4 space-y-2">
+              {[
+                { path: '/', icon: Activity, label: 'Dashboard' },
+                { path: '/analytics', icon: BarChart2, label: 'Analytics' },
+                { path: '/arduino-setup', icon: Settings, label: 'Setup' },
+                { path: '/profile', icon: User, label: 'Profile' }
+              ].map(({ path, icon: Icon, label }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive(path)
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="font-medium">{label}</span>
+                </Link>
+              ))}
             </div>
-          </div>
+          </motion.nav>
         )}
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
-        <Outlet />
+      <main className="pt-32 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-blue-900 text-white mt-auto py-4">
-        <div className="container mx-auto px-4 text-center text-blue-200 text-sm">
-          <p>© 2025 HealthTrack Pro. All rights reserved.</p>
-          <p className="mt-1">Real-time health monitoring for a better life.</p>
+      <footer className="bg-white border-t border-gray-100 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+              <Heart className="h-5 w-5 text-blue-500" />
+              <span className="font-semibold text-gray-800">HealthTrack Pro</span>
+            </div>
+            <div className="text-sm text-gray-500">
+              © 2025 HealthTrack Pro. All rights reserved.
+            </div>
+          </div>
         </div>
       </footer>
     </div>
