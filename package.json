@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.18",
+    "@tailwindcss/forms": "^0.5.7",
     "chart.js": "^4.4.1",
     "chartjs-adapter-moment": "^1.0.1",
+    "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "moment": "^2.29.4",
     "react": "^18.3.1",
